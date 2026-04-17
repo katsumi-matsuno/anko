@@ -30,6 +30,7 @@ class PomodoroGamification:
     XP_PER_POMODORO = 25
     XP_PER_LEVEL = 100
     DAILY_TARGET = 4
+    MAX_FOCUS_MINUTES = 240
 
     def __init__(self, data_file: Path = DATA_FILE) -> None:
         self.data_file = data_file
@@ -56,8 +57,8 @@ class PomodoroGamification:
         )
 
     def complete_pomodoro(self, focus_minutes: int = 25, completed_at: date | None = None) -> dict[str, Any]:
-        if focus_minutes <= 0 or focus_minutes > 240:
-            raise ValueError("focus_minutes must be between 1 and 240")
+        if focus_minutes <= 0 or focus_minutes > self.MAX_FOCUS_MINUTES:
+            raise ValueError(f"focus_minutes must be between 1 and {self.MAX_FOCUS_MINUTES}")
 
         completed = completed_at or date.today()
         self._data["sessions"].append(
@@ -309,7 +310,7 @@ class Handler(BaseHTTPRequestHandler):
         self._send_json(state)
 
     def log_message(self, format: str, *args: Any) -> None:  # noqa: A003
-        return
+        pass
 
     def _send_html(self, html: str) -> None:
         encoded = html.encode("utf-8")

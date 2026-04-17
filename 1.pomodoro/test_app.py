@@ -22,8 +22,10 @@ class PomodoroGamificationTest(unittest.TestCase):
             self.engine.complete_pomodoro(focus_minutes=25)
 
         state = self.engine.get_state()
-        self.assertEqual(state["xp"], 125)
-        self.assertEqual(state["level"], 2)
+        expected_xp = 5 * self.engine.XP_PER_POMODORO
+        expected_level = (expected_xp // self.engine.XP_PER_LEVEL) + 1
+        self.assertEqual(state["xp"], expected_xp)
+        self.assertEqual(state["level"], expected_level)
 
     def test_streak_resets_when_day_is_missed(self) -> None:
         today = date.today()
