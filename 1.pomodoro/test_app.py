@@ -29,6 +29,11 @@ class TestPomodoroApp(unittest.TestCase):
         self.assertIn('id="fx"', html)
         self.assertIn('A/Bテスト: variant=B', html)
 
+    def test_build_html_variant_a(self):
+        html = app.build_html("a")
+        self.assertIn('A/Bテスト: variant=A', html)
+        self.assertIn("state.variant === 'a' ? 60 : 20", html)
+
 
 if __name__ == "__main__":
     unittest.main()

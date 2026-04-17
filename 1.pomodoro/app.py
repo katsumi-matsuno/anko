@@ -286,10 +286,16 @@ def build_html(variant: str = "a") -> str:
     }}
 
     if (state.variant === 'a') {{
-      const t = (now / 1000) % 4;
-      const base = Math.min(w, h) * 0.17;
-      for (let i = 0; i < 3; i++) {{
-        const r = base + ((t + i * 1.3) % 4) * 90;
+      const RIPPLE_CYCLE = 4;
+      const RIPPLE_BASE_RATIO = 0.17;
+      const RIPPLE_COUNT = 3;
+      const RIPPLE_PHASE_STEP = 1.3;
+      const RIPPLE_GROWTH = 90;
+
+      const t = (now / 1000) % RIPPLE_CYCLE;
+      const base = Math.min(w, h) * RIPPLE_BASE_RATIO;
+      for (let i = 0; i < RIPPLE_COUNT; i++) {{
+        const r = base + ((t + i * RIPPLE_PHASE_STEP) % RIPPLE_CYCLE) * RIPPLE_GROWTH;
         ctx.beginPath();
         ctx.strokeStyle = `rgba(120,170,255,${{0.14 - i * 0.03}})`;
         ctx.lineWidth = 1.3;
