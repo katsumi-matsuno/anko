@@ -313,6 +313,7 @@
       let focused = 0;
       let totalSeconds = Number(workSelect.value) * 60;
       let remaining = totalSeconds;
+      let audioContext = null;
 
       const formatTime = (seconds) => {
         const min = String(Math.floor(seconds / 60)).padStart(2, "0");
@@ -322,7 +323,10 @@
 
       const beep = (enabled) => {
         if (!enabled) return;
-        const context = new (window.AudioContext || window.webkitAudioContext)();
+        if (!audioContext) {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        const context = audioContext;
         const oscillator = context.createOscillator();
         const gain = context.createGain();
         oscillator.type = "sine";
@@ -332,7 +336,6 @@
         gain.connect(context.destination);
         oscillator.start();
         oscillator.stop(context.currentTime + 0.08);
-        oscillator.onended = () => context.close();
       };
 
       const refresh = () => {
@@ -361,6 +364,12 @@
         applyDuration();
       };
 
+      const stopTimer = () => {
+        clearInterval(timer);
+        timer = null;
+        startButton.textContent = "開始";
+      };
+
       workSelect.addEventListener("change", () => {
         if (mode === "work" && !timer) applyDuration();
       });
@@ -375,9 +384,7 @@
 
       startButton.addEventListener("click", () => {
         if (timer) {
-          clearInterval(timer);
-          timer = null;
-          startButton.textContent = "開始";
+          stopTimer();
           return;
         }
 
@@ -385,23 +392,23 @@
         startButton.textContent = "一時停止";
         timer = setInterval(() => {
           remaining -= 1;
-          if (remaining >= 0) {
+          if (remaining <= 0) {
+            remaining = 0;
+            refresh();
+            beep(soundEnd.checked);
+            stopTimer();
+            switchMode();
+          } else {
             refresh();
             beep(soundTick.checked);
-          }
-          if (remaining < 0) {
-            beep(soundEnd.checked);
-            switchMode();
           }
         }, 1000);
       });
 
       resetButton.addEventListener("click", () => {
-        clearInterval(timer);
-        timer = null;
+        stopTimer();
         mode = "work";
         phaseLabel.textContent = "作業中";
-        startButton.textContent = "開始";
         applyDuration();
       });
 
