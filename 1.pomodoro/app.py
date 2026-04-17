@@ -2,7 +2,7 @@
 
 
 def main() -> None:
-    print("Pomodoro アプリの起動コマンド: python 1.pomodoro/app.py")
+    print("Pomodoro アプリを起動しました。")
 
 
 if __name__ == "__main__":
