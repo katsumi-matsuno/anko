@@ -20,6 +20,8 @@ class PomodoroAppTests(unittest.TestCase):
         self.assertEqual(app.progress_color(100, 100), (59, 130, 246))
         self.assertEqual(app.progress_color(100, 50), (234, 179, 8))
         self.assertEqual(app.progress_color(100, 0), (239, 68, 68))
+        self.assertEqual(app.progress_color(100, -10), (239, 68, 68))
+        self.assertEqual(app.progress_color(100, 999), (59, 130, 246))
 
     def test_build_html_includes_ui_elements(self):
         html = app.build_html("b")

@@ -35,10 +35,18 @@ def progress_color(total_seconds: int, remaining_seconds: float) -> tuple[int, i
 
     if elapsed_ratio < 0.5:
         t = elapsed_ratio / 0.5
-        return tuple(_lerp(blue[i], yellow[i], t) for i in range(3))
+        return (
+            _lerp(blue[0], yellow[0], t),
+            _lerp(blue[1], yellow[1], t),
+            _lerp(blue[2], yellow[2], t),
+        )
 
     t = (elapsed_ratio - 0.5) / 0.5
-    return tuple(_lerp(yellow[i], red[i], t) for i in range(3))
+    return (
+        _lerp(yellow[0], red[0], t),
+        _lerp(yellow[1], red[1], t),
+        _lerp(yellow[2], red[2], t),
+    )
 
 
 def build_html(variant: str = "a") -> str:
@@ -186,7 +194,7 @@ def build_html(variant: str = "a") -> str:
   function syncView() {{
     const totalSec = phaseTotalSeconds();
     const remainingSec = clamp(state.remainingMs / 1000, 0, totalSec);
-    const offset = {progress_offset.__name__}(totalSec, remainingSec, circumference);
+    const offset = progressOffset(totalSec, remainingSec, circumference);
     progressEl.style.strokeDashoffset = String(offset);
 
     const [r,g,b] = getColor(totalSec, remainingSec);
@@ -198,7 +206,7 @@ def build_html(variant: str = "a") -> str:
     timeEl.textContent = formatTime(state.remainingMs);
   }}
 
-  function progress_offset(total, remaining, c) {{
+  function progressOffset(total, remaining, c) {{
     if (total <= 0) return c;
     const ratio = clamp(remaining / total, 0, 1);
     return c * (1 - ratio);
