@@ -33,6 +33,15 @@ class PomodoroGamificationTest(unittest.TestCase):
         state = self.engine.get_state()
         self.assertEqual(state["streak_days"], 0)
 
+    def test_streak_continues_for_consecutive_days(self) -> None:
+        today = date.today()
+        self.engine.complete_pomodoro(completed_at=today - timedelta(days=2))
+        self.engine.complete_pomodoro(completed_at=today - timedelta(days=1))
+        self.engine.complete_pomodoro(completed_at=today)
+
+        state = self.engine.get_state()
+        self.assertEqual(state["streak_days"], 3)
+
     def test_weekly_badge_and_stats(self) -> None:
         today = date.today()
         for offset in range(7):
