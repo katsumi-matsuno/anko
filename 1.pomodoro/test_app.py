@@ -9,7 +9,7 @@ assert spec and spec.loader
 spec.loader.exec_module(app)
 
 
-class PomodoroAppTests(unittest.TestCase):
+class TestPomodoroApp(unittest.TestCase):
     def test_progress_offset_boundaries(self):
         circumference = 100.0
         self.assertEqual(app.progress_offset(10, 10, circumference), 0.0)

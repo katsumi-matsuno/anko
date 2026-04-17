@@ -8,6 +8,7 @@ BREAK_SECONDS = 5 * 60
 
 
 def _clamp(value: float, low: float, high: float) -> float:
+    """値を指定範囲に収める。"""
     return max(low, min(high, value))
 
 
@@ -20,6 +21,7 @@ def progress_offset(total_seconds: int, remaining_seconds: float, circumference:
 
 
 def _lerp(a: int, b: int, t: float) -> int:
+    """a と b の間を t(0.0-1.0) で線形補間した整数値を返す。"""
     return round(a + (b - a) * _clamp(t, 0.0, 1.0))
 
 
