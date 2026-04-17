@@ -2,7 +2,7 @@
 
 ## Pomodoro アプリの起動方法
 
-リポジトリのルート (`/home/runner/work/anko/anko`) で以下を実行してください。
+リポジトリのルートディレクトリで以下を実行してください。
 
 ```bash
 python 1.pomodoro/app.py
