@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ポモドーロタイマー</title>
+    <style>
+      :root {
+        --bg-start: #5854d6;
+        --bg-end: #7a5de8;
+        --panel: #f3f3f7;
+        --card: #d9d9ea;
+        --text: #2f2f38;
+        --muted: #6b6b75;
+        --primary: #6d7ae6;
+        --ring-bg: #e2e3e8;
+      }
+
+      body[data-theme="dark"] {
+        --bg-start: #131523;
+        --bg-end: #272b48;
+        --panel: #1d2136;
+        --card: #2a3050;
+        --text: #f0f2ff;
+        --muted: #b3b9d8;
+        --primary: #9aa7ff;
+        --ring-bg: #40486c;
+      }
+
+      body[data-theme="focus"] {
+        --bg-start: #efefef;
+        --bg-end: #efefef;
+        --panel: #ffffff;
+        --card: #f6f6f6;
+        --text: #1f1f1f;
+        --muted: #666666;
+        --primary: #242424;
+        --ring-bg: #dedede;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+        color: var(--text);
+        font-family: "Segoe UI", "Hiragino Sans", sans-serif;
+      }
+
+      .app {
+        width: min(460px, calc(100vw - 32px));
+        background: var(--panel);
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 20px 32px rgba(0, 0, 0, 0.12);
+      }
+
+      h1 {
+        margin: 0 0 18px;
+        font-size: 38px;
+        line-height: 1.2;
+      }
+
+      .settings {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .settings label {
+        font-size: 13px;
+        color: var(--muted);
+        display: grid;
+        gap: 6px;
+      }
+
+      select {
+        width: 100%;
+        border: 1px solid color-mix(in srgb, var(--muted) 35%, transparent);
+        border-radius: 10px;
+        background: transparent;
+        color: var(--text);
+        padding: 8px;
+      }
+
+      .sound-grid {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .sound-item {
+        background: color-mix(in srgb, var(--card) 65%, transparent);
+        border-radius: 10px;
+        padding: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .phase {
+        text-align: center;
+        margin: 10px 0 14px;
+        color: var(--muted);
+        font-size: 30px;
+      }
+
+      .ring-wrap {
+        width: 280px;
+        margin: 0 auto 16px;
+        position: relative;
+      }
+
+      .ring {
+        width: 280px;
+        height: 280px;
+        border-radius: 50%;
+        background: conic-gradient(var(--primary) calc(var(--progress) * 1%), var(--ring-bg) 0);
+        display: grid;
+        place-items: center;
+      }
+
+      .ring::before {
+        content: "";
+        width: 210px;
+        height: 210px;
+        border-radius: 50%;
+        background: var(--panel);
+      }
+
+      .time {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        font-size: 58px;
+        font-weight: 700;
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 16px;
+      }
+
+      button {
+        border-radius: 999px;
+        border: 2px solid var(--primary);
+        padding: 10px 26px;
+        font-size: 17px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      #start {
+        background: var(--primary);
+        color: var(--panel);
+      }
+
+      #reset {
+        background: transparent;
+        color: var(--primary);
+      }
+
+      .stats {
+        background: var(--card);
+        border-radius: 14px;
+        padding: 12px 14px;
+      }
+
+      .stats h2 {
+        margin: 0 0 10px;
+        font-size: 26px;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        text-align: center;
+      }
+
+      .stats strong {
+        display: block;
+        font-size: 42px;
+        color: var(--primary);
+      }
+
+      .stats span {
+        color: var(--muted);
+      }
+
+      @media (max-width: 480px) {
+        h1 {
+          font-size: 32px;
+        }
+
+        .phase,
+        .stats h2 {
+          font-size: 26px;
+        }
+
+        .ring,
+        .ring-wrap {
+          width: 230px;
+          height: 230px;
+        }
+
+        .ring::before {
+          width: 170px;
+          height: 170px;
+        }
+
+        .time {
+          font-size: 50px;
+        }
+      }
+    </style>
+  </head>
+  <body data-theme="light">
+    <main class="app">
+      <h1>ポモドーロタイマー</h1>
+
+      <section class="settings" aria-label="設定">
+        <label>
+          作業時間
+          <select id="work-duration">
+            <option value="15">15分</option>
+            <option value="25" selected>25分</option>
+            <option value="35">35分</option>
+            <option value="45">45分</option>
+          </select>
+        </label>
+
+        <label>
+          休憩時間
+          <select id="break-duration">
+            <option value="5" selected>5分</option>
+            <option value="10">10分</option>
+            <option value="15">15分</option>
+          </select>
+        </label>
+
+        <label>
+          テーマ
+          <select id="theme">
+            <option value="light" selected>ライト</option>
+            <option value="dark">ダーク</option>
+            <option value="focus">フォーカス（ミニマル）</option>
+          </select>
+        </label>
+
+        <div class="sound-grid" role="group" aria-label="サウンド設定">
+          <label class="sound-item">開始音<input id="sound-start" type="checkbox" checked /></label>
+          <label class="sound-item">終了音<input id="sound-end" type="checkbox" checked /></label>
+          <label class="sound-item">tick音<input id="sound-tick" type="checkbox" /></label>
+        </div>
+      </section>
+
+      <div class="phase" id="phase">作業中</div>
+
+      <section class="ring-wrap" aria-label="タイマー">
+        <div class="ring" id="ring" style="--progress: 100"></div>
+        <div class="time" id="time">25:00</div>
+      </section>
+
+      <div class="actions">
+        <button id="start">開始</button>
+        <button id="reset">リセット</button>
+      </div>
+
+      <section class="stats">
+        <h2>今日の進捗</h2>
+        <div class="stats-grid">
+          <div>
+            <strong id="done-count">0</strong>
+            <span>完了</span>
+          </div>
+          <div>
+            <strong id="focus-minutes">0分</strong>
+            <span>集中時間</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const workSelect = document.getElementById("work-duration");
+      const breakSelect = document.getElementById("break-duration");
+      const themeSelect = document.getElementById("theme");
+      const startButton = document.getElementById("start");
+      const resetButton = document.getElementById("reset");
+      const phaseLabel = document.getElementById("phase");
+      const timeLabel = document.getElementById("time");
+      const ring = document.getElementById("ring");
+      const doneCount = document.getElementById("done-count");
+      const focusMinutes = document.getElementById("focus-minutes");
+
+      const soundStart = document.getElementById("sound-start");
+      const soundEnd = document.getElementById("sound-end");
+      const soundTick = document.getElementById("sound-tick");
+
+      let mode = "work";
+      let timer = null;
+      let completed = 0;
+      let focused = 0;
+      let totalSeconds = Number(workSelect.value) * 60;
+      let remaining = totalSeconds;
+      let audioContext = null;
+
+      const formatTime = (seconds) => {
+        const min = String(Math.floor(seconds / 60)).padStart(2, "0");
+        const sec = String(seconds % 60).padStart(2, "0");
+        return `${min}:${sec}`;
+      };
+
+      const beep = (enabled) => {
+        if (!enabled) return;
+        if (!audioContext) {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        const context = audioContext;
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        oscillator.type = "sine";
+        oscillator.frequency.value = 660;
+        gain.gain.value = 0.04;
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+        oscillator.start();
+        oscillator.stop(context.currentTime + 0.08);
+      };
+
+      const refresh = () => {
+        timeLabel.textContent = formatTime(remaining);
+        ring.style.setProperty("--progress", String((remaining / totalSeconds) * 100));
+      };
+
+      const applyDuration = () => {
+        totalSeconds = Number(mode === "work" ? workSelect.value : breakSelect.value) * 60;
+        remaining = totalSeconds;
+        refresh();
+      };
+
+      const switchMode = () => {
+        if (mode === "work") {
+          completed += 1;
+          focused += Number(workSelect.value);
+          doneCount.textContent = String(completed);
+          focusMinutes.textContent = `${focused}分`;
+          mode = "break";
+          phaseLabel.textContent = "休憩中";
+        } else {
+          mode = "work";
+          phaseLabel.textContent = "作業中";
+        }
+        applyDuration();
+      };
+
+      const stopTimer = () => {
+        clearInterval(timer);
+        timer = null;
+        startButton.textContent = "開始";
+      };
+
+      workSelect.addEventListener("change", () => {
+        if (mode === "work" && !timer) applyDuration();
+      });
+
+      breakSelect.addEventListener("change", () => {
+        if (mode === "break" && !timer) applyDuration();
+      });
+
+      themeSelect.addEventListener("change", () => {
+        document.body.dataset.theme = themeSelect.value;
+      });
+
+      startButton.addEventListener("click", () => {
+        if (timer) {
+          stopTimer();
+          return;
+        }
+
+        beep(soundStart.checked);
+        startButton.textContent = "一時停止";
+        timer = setInterval(() => {
+          remaining -= 1;
+          if (remaining <= 0) {
+            remaining = 0;
+            refresh();
+            beep(soundEnd.checked);
+            stopTimer();
+            switchMode();
+          } else {
+            refresh();
+            beep(soundTick.checked);
+          }
+        }, 1000);
+      });
+
+      resetButton.addEventListener("click", () => {
+        stopTimer();
+        mode = "work";
+        phaseLabel.textContent = "作業中";
+        applyDuration();
+      });
+
+      refresh();
+    </script>
+  </body>
+</html>
