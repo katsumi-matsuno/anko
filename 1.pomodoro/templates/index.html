@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ポモドーロタイマー</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="card">
+        <h1 class="app-title">ポモドーロタイマー</h1>
+
+        <p id="status" class="status">作業中</p>
+
+        <div class="timer-container">
+            <svg class="progress-ring" viewBox="0 0 200 200">
+                <circle class="progress-ring__bg" cx="100" cy="100" r="85"
+                        stroke-width="12" fill="none" />
+                <circle id="progress-circle" class="progress-ring__circle"
+                        cx="100" cy="100" r="85"
+                        stroke-width="12" fill="none"
+                        stroke-linecap="round"
+                        transform="rotate(-90 100 100)" />
+            </svg>
+            <span id="timer-display" class="timer-display">25:00</span>
+        </div>
+
+        <div class="controls">
+            <button id="btn-start" class="btn btn-primary">開始</button>
+            <button id="btn-reset" class="btn btn-secondary">リセット</button>
+        </div>
+
+        <div class="stats-card">
+            <h2 class="stats-title">今日の進捗</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span id="completed-count" class="stat-value">0</span>
+                    <span class="stat-label">完了</span>
+                </div>
+                <div class="stat-item">
+                    <span id="total-time" class="stat-value stat-value--accent">0分</span>
+                    <span class="stat-label">集中時間</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/timerCore.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/timer.js') }}"></script>
+</body>
+</html>
