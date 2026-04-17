@@ -25,3 +25,4 @@ Thumbs.db
 
 # Flask
 instance/
+1.pomodoro/.gamification_data.json
